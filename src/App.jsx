@@ -9,9 +9,9 @@ function App() {
   const [lastUploadTime, setLastUploadTime] = useState(null);
 
   const tabs = [
-    { id: 'upload', label: '📁 Upload File', icon: '📁' },
-    { id: 'dashboard', label: '📊 Dashboard', icon: '📊' },
-    { id: 'data-table', label: '📋 Data Table', icon: '📋' }
+    { id: 'upload', label: 'Upload File', icon: '📁' },
+    { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+    { id: 'data-table', label: 'Data Table', icon: '📋' }
   ];
 
   const handleDataUpload = (data) => {
@@ -23,7 +23,7 @@ function App() {
     <div className="App">
       {/* Header */}
       <div className="header">
-        <h1>📊 Cognizant Analytics Dashboard</h1>
+        <h1>📊 AEM Analytics Dashboard</h1>
         <p>Professional Data Analytics for Demand/Supply/TAG Pipeline Analysis</p>
       </div>
 
