@@ -99,66 +99,92 @@ function DashboardTab({ uploadedData }) {
   const getKPIMetrics = () => {
     if (!dashboardData) return [];
 
-    const { data, numericColumns, totalRecords } = dashboardData;
+    const { data, categoricalColumns, totalRecords } = dashboardData;
     const metrics = [
       {
-        label: 'Total Records',
+        label: 'Total Employees',
         value: totalRecords.toLocaleString(),
-        icon: '📊'
+        icon: '👥'
       }
     ];
 
-    if (numericColumns.length > 0) {
-      const firstNumeric = numericColumns[0];
-      const values = data.map(row => parseFloat(row[firstNumeric]) || 0);
-      const avg = values.reduce((sum, val) => sum + val, 0) / values.length;
+    // Count unique competencies
+    if (categoricalColumns.length > 0) {
+      const competencyCol = categoricalColumns.find(col => 
+        col.toLowerCase().includes('competency') || 
+        col.toLowerCase().includes('skill') ||
+        col.toLowerCase().includes('technology')
+      ) || categoricalColumns[0];
+      
+      const uniqueCompetencies = new Set(data.map(row => row[competencyCol]).filter(val => val && val.toString().trim()));
       
       metrics.push({
-        label: `Avg ${firstNumeric}`,
-        value: avg.toFixed(2),
-        icon: '📈'
+        label: 'Unique Competencies',
+        value: uniqueCompetencies.size.toString(),
+        icon: '🎯'
       });
     }
 
-    if (numericColumns.length > 1) {
-      const secondNumeric = numericColumns[1];
-      const values = data.map(row => parseFloat(row[secondNumeric]) || 0);
-      const max = Math.max(...values);
+    // Count active projects or roles
+    if (categoricalColumns.length > 1) {
+      const roleCol = categoricalColumns.find(col => 
+        col.toLowerCase().includes('role') || 
+        col.toLowerCase().includes('position') ||
+        col.toLowerCase().includes('title')
+      ) || categoricalColumns[1];
+      
+      const uniqueRoles = new Set(data.map(row => row[roleCol]).filter(val => val && val.toString().trim()));
       
       metrics.push({
-        label: `Max ${secondNumeric}`,
-        value: max.toFixed(2),
-        icon: '⬆️'
+        label: 'Active Roles',
+        value: uniqueRoles.size.toString(),
+        icon: '💼'
       });
     }
 
     metrics.push({
-      label: 'Data Quality',
-      value: '100%',
+      label: 'System Status',
+      value: 'Online',
       icon: '✅'
     });
 
     return metrics;
   };
 
-  const getTrendChart = () => {
-    if (!dashboardData || dashboardData.numericColumns.length === 0) return null;
+  const getCompetencyChart = () => {
+    if (!dashboardData || dashboardData.categoricalColumns.length === 0) return null;
 
-    const { data, numericColumns } = dashboardData;
-    const column = numericColumns[0];
-    const values = data.map(row => parseFloat(row[column]) || 0);
-    const labels = data.map((_, index) => `Record ${index + 1}`);
+    const { data, categoricalColumns } = dashboardData;
+    
+    // Find competency-related column
+    const competencyCol = categoricalColumns.find(col => 
+      col.toLowerCase().includes('competency') || 
+      col.toLowerCase().includes('skill') ||
+      col.toLowerCase().includes('technology') ||
+      col.toLowerCase().includes('expertise')
+    ) || categoricalColumns[0];
+    
+    // Count competency occurrences
+    const counts = {};
+    data.forEach(row => {
+      const value = row[competencyCol]?.toString().trim();
+      if (value) {
+        counts[value] = (counts[value] || 0) + 1;
+      }
+    });
+
+    const sortedEntries = Object.entries(counts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 8);
 
     return {
       data: {
-        labels: labels.slice(0, 20), // Show first 20 records
+        labels: sortedEntries.map(([key]) => key),
         datasets: [{
-          label: column,
-          data: values.slice(0, 20),
-          borderColor: cognizantColors.primary,
-          backgroundColor: cognizantColors.accent + '20',
+          data: sortedEntries.map(([,value]) => value),
+          backgroundColor: colorPalette,
           borderWidth: 2,
-          fill: true,
+          borderColor: '#fff'
         }]
       },
       options: {
@@ -166,12 +192,10 @@ function DashboardTab({ uploadedData }) {
         plugins: {
           title: {
             display: true,
-            text: `Trend Analysis - ${column}`
-          }
-        },
-        scales: {
-          y: {
-            beginAtZero: true
+            text: 'Competency Distribution'
+          },
+          legend: {
+            position: 'bottom'
           }
         }
       }
@@ -219,39 +243,44 @@ function DashboardTab({ uploadedData }) {
     };
   };
 
-  const getComparisonChart = () => {
-    if (!dashboardData || dashboardData.numericColumns.length === 0 || dashboardData.categoricalColumns.length === 0) {
+  const getPrimarySkillChart = () => {
+    if (!dashboardData || dashboardData.categoricalColumns.length === 0) {
       return null;
     }
 
-    const { data, numericColumns, categoricalColumns } = dashboardData;
-    const numericCol = numericColumns[0];
-    const categoricalCol = categoricalColumns[0];
+    const { data, categoricalColumns } = dashboardData;
+    
+    // Find primary skill column
+    const skillCol = categoricalColumns.find(col => 
+      col.toLowerCase().includes('primary') || 
+      col.toLowerCase().includes('skill') ||
+      col.toLowerCase().includes('main') ||
+      col.toLowerCase().includes('core')
+    ) || categoricalColumns[1] || categoricalColumns[0];
 
-    // Group by categorical column and sum numeric values
-    const grouped = {};
+    // Count skill occurrences
+    const skillCounts = {};
     data.forEach(row => {
-      const category = row[categoricalCol]?.toString().trim();
-      const value = parseFloat(row[numericCol]) || 0;
-      
-      if (category) {
-        grouped[category] = (grouped[category] || 0) + value;
+      const skill = row[skillCol]?.toString().trim();
+      if (skill) {
+        skillCounts[skill] = (skillCounts[skill] || 0) + 1;
       }
     });
 
-    const sortedEntries = Object.entries(grouped)
+    const sortedSkills = Object.entries(skillCounts)
       .sort(([,a], [,b]) => b - a)
       .slice(0, 10);
 
     return {
       data: {
-        labels: sortedEntries.map(([key]) => key),
+        labels: sortedSkills.map(([key]) => key),
         datasets: [{
-          label: numericCol,
-          data: sortedEntries.map(([,value]) => value),
-          backgroundColor: cognizantColors.primary,
+          label: 'Employee Count',
+          data: sortedSkills.map(([,value]) => value),
+          backgroundColor: colorPalette[0],
           borderColor: cognizantColors.secondary,
-          borderWidth: 1
+          borderWidth: 1,
+          borderRadius: 4
         }]
       },
       options: {
@@ -259,14 +288,25 @@ function DashboardTab({ uploadedData }) {
         plugins: {
           title: {
             display: true,
-            text: `${numericCol} by ${categoricalCol}`
+            text: 'Primary Skill Distribution'
           }
         },
         scales: {
           y: {
-            beginAtZero: true
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Number of Employees'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Primary Skills'
+            }
           }
-        }
+        },
+        indexAxis: 'x'
       }
     };
   };
@@ -285,9 +325,9 @@ function DashboardTab({ uploadedData }) {
 
   const sheets = Object.keys(uploadedData);
   const metrics = getKPIMetrics();
-  const trendChart = getTrendChart();
+  const competencyChart = getCompetencyChart();
   const categoryChart = getCategoryChart();
-  const comparisonChart = getComparisonChart();
+  const primarySkillChart = getPrimarySkillChart();
 
   return (
     <div className="dashboard-tab">
@@ -341,11 +381,11 @@ function DashboardTab({ uploadedData }) {
 
       {/* Charts Grid */}
       <div className="grid grid-2">
-        {/* Trend Chart */}
-        {trendChart && (
+        {/* Competency Distribution Chart */}
+        {competencyChart && (
           <div className="chart-container">
-            <div className="chart-title">📈 Trend Analysis</div>
-            <Line data={trendChart.data} options={trendChart.options} />
+            <div className="chart-title">🎯 Competency Distribution</div>
+            <Pie data={competencyChart.data} options={competencyChart.options} />
           </div>
         )}
 
@@ -357,11 +397,11 @@ function DashboardTab({ uploadedData }) {
           </div>
         )}
 
-        {/* Comparison Chart */}
-        {comparisonChart && (
+        {/* Primary Skill Chart */}
+        {primarySkillChart && (
           <div className="chart-container">
-            <div className="chart-title">📊 Comparison Analysis</div>
-            <Bar data={comparisonChart.data} options={comparisonChart.options} />
+            <div className="chart-title">💼 Primary Skill Analysis</div>
+            <Bar data={primarySkillChart.data} options={primarySkillChart.options} />
           </div>
         )}
 
