@@ -52,16 +52,19 @@ body {
   padding: 4px;
   margin-bottom: 2rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  overflow-x: auto;
+  min-height: 60px;
 }
 
 .tab-button {
   flex: 1;
-  padding: 1rem 2rem;
+  min-width: 120px;
+  padding: 1rem 1.5rem;
   border: none;
   background: transparent;
   color: #666;
   font-weight: 500;
-  font-size: 1rem;
+  font-size: 0.9rem;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -69,6 +72,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  white-space: nowrap;
 }
 
 .tab-button:hover {
@@ -379,11 +383,16 @@ body {
   }
   
   .tabs {
-    flex-direction: column;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
   
   .tab-button {
-    margin-bottom: 0;
+    min-width: 140px;
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    flex-shrink: 0;
   }
   
   .search-filters {
