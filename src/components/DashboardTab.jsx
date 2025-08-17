@@ -25,7 +25,7 @@ ChartJS.register(
   ArcElement
 );
 
-function DashboardTab({ uploadedData }) {
+function DashboardTab({ uploadedData, isSampleData }) {
   const [refreshKey, setRefreshKey] = useState(0);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [selectedSheet, setSelectedSheet] = useState('');
@@ -316,7 +316,7 @@ function DashboardTab({ uploadedData }) {
       <div className="dashboard-tab">
         <div className="card">
           <div className="message message-warning">
-            ⚠️ Please upload an Excel file in the 'Upload File' tab to view the dashboard.
+            ⚠️ Loading dashboard data...
           </div>
         </div>
       </div>
@@ -333,6 +333,18 @@ function DashboardTab({ uploadedData }) {
     <div className="dashboard-tab">
       {/* Controls */}
       <div className="card">
+        {isSampleData && (
+          <div style={{ 
+            backgroundColor: '#e3f2fd', 
+            padding: '0.5rem 1rem', 
+            borderRadius: '4px', 
+            marginBottom: '1rem',
+            fontSize: '0.9rem',
+            color: '#1976d2'
+          }}>
+            📋 Sample Data Preview - Upload your own Excel file to replace this data
+          </div>
+        )}
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
           <div>
             <label>Select Sheet:</label>

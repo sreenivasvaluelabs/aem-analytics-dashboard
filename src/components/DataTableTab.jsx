@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 
-function DataTableTab({ uploadedData }) {
+function DataTableTab({ uploadedData, isSampleData }) {
   const [selectedSheet, setSelectedSheet] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedColumns, setSelectedColumns] = useState([]);
@@ -175,7 +175,7 @@ function DataTableTab({ uploadedData }) {
       <div className="data-table-tab">
         <div className="card">
           <div className="message message-warning">
-            ⚠️ Please upload an Excel file in the 'Upload File' tab to view the data table.
+            ⚠️ Loading data table...
           </div>
         </div>
       </div>
@@ -186,6 +186,19 @@ function DataTableTab({ uploadedData }) {
     <div className="data-table-tab">
       <div className="card">
         <h3>📋 Data Table & Analysis</h3>
+        
+        {isSampleData && (
+          <div style={{ 
+            backgroundColor: '#e3f2fd', 
+            padding: '0.5rem 1rem', 
+            borderRadius: '4px', 
+            marginBottom: '1rem',
+            fontSize: '0.9rem',
+            color: '#1976d2'
+          }}>
+            📋 Sample Data Preview - Upload your own Excel file to replace this data
+          </div>
+        )}
         
         {/* Controls */}
         <div className="search-filters">

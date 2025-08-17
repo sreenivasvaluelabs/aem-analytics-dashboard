@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import * as XLSX from 'xlsx';
 
-function UploadTab({ onDataUpload, uploadedData, lastUploadTime }) {
+function UploadTab({ onDataUpload, uploadedData, lastUploadTime, isSampleData }) {
   const [isDragActive, setIsDragActive] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState(null);
@@ -194,6 +194,50 @@ function UploadTab({ onDataUpload, uploadedData, lastUploadTime }) {
         {/* File Status Card */}
         <div className="card">
           <h3>📊 Upload Status</h3>
+          
+          {uploadedData && isSampleData && !fileInfo && (
+            <>
+              <div style={{ 
+                backgroundColor: '#e3f2fd', 
+                padding: '1rem', 
+                borderRadius: '4px', 
+                marginBottom: '1rem',
+                fontSize: '0.9rem',
+                color: '#1976d2'
+              }}>
+                📋 Currently showing sample data from AEM Analytics Dashboard. Upload your own Excel file to replace it.
+              </div>
+              
+              <div className="metrics-grid">
+                <div className="metric-card">
+                  <div className="metric-value">{Object.values(uploadedData).reduce((total, sheet) => total + (Array.isArray(sheet) ? sheet.length : 0), 0).toLocaleString()}</div>
+                  <div className="metric-label">Sample Records</div>
+                </div>
+                
+                <div className="metric-card">
+                  <div className="metric-value">{Object.keys(uploadedData).length}</div>
+                  <div className="metric-label">Sample Sheets</div>
+                </div>
+                
+                <div className="metric-card">
+                  <div className="metric-value">Sample</div>
+                  <div className="metric-label">Data Type</div>
+                </div>
+                
+                <div className="metric-card">
+                  <div className="metric-value">✓</div>
+                  <div className="metric-label">Status</div>
+                </div>
+              </div>
+              
+              <div style={{ marginTop: '1rem' }}>
+                <p><strong>Data Source:</strong> Sample AEM Analytics Data</p>
+                {lastUploadTime && (
+                  <p><strong>Loaded:</strong> {lastUploadTime.toLocaleString()}</p>
+                )}
+              </div>
+            </>
+          )}
           
           {uploadedData && fileInfo ? (
             <>
